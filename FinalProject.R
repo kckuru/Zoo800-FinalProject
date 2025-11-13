@@ -169,7 +169,7 @@ cat("This represents a", round(((pred_df$fit[2] - pred_df$fit[1]) / pred_df$fit[
 ## Plotting ##
 ##############
 
-# === Visualization of trends over years ===
+# === Visualization of trends over full period ===
 abs_trends_over_years <- ggplot(summer_summary, aes(x = year, y = mean_value)) +
   # Background trend first (so it's behind data)
   geom_smooth(method = "lm", se = TRUE, color = "#FDAE61", fill = "#FDAE61", 
@@ -185,6 +185,7 @@ abs_trends_over_years <- ggplot(summer_summary, aes(x = year, y = mean_value)) +
   
   # Color scales
   scale_fill_viridis_c(option = "plasma", direction = 1, 
+                       breaks = seq(0.1, 0.4, 0.05),
                        guide = guide_colorbar(barwidth = 1, barheight = 10)) +
   scale_x_continuous(breaks = seq(1990, 2020, 5)) +  # Clean x-axis breaks
   scale_y_continuous(limits = c(0.05, 0.42), 
@@ -214,15 +215,16 @@ abs_trends_over_years <- ggplot(summer_summary, aes(x = year, y = mean_value)) +
     plot.subtitle = element_text(size = 11, hjust = 0, color = "gray30"),
     axis.title = element_text(face = "bold", size = 12),
     axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 0),  # Horizontal labels (cleaner)
+    axis.text.x = element_text(angle = 0),
     legend.position = "right",
     legend.title = element_text(size = 10, face = "bold"),
-    panel.grid.minor = element_blank(),  # Remove minor gridlines
+    panel.grid.minor = element_blank(),
     panel.grid.major = element_line(color = "gray90", linewidth = 0.3),
     plot.margin = margin(10, 15, 10, 10)
   )
 
 abs_trends_over_years
+
 
 # === Visualization of trends post-2010 ===
 
