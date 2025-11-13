@@ -169,41 +169,133 @@ cat("This represents a", round(((pred_df$fit[2] - pred_df$fit[1]) / pred_df$fit[
 ## Plotting ##
 ##############
 
-# === Enhanced visualization ===
+# === Visualization of trends over years ===
 abs_trends_over_years <- ggplot(summer_summary, aes(x = year, y = mean_value)) +
-  geom_line(color = "#2C7BB6", linewidth = 1) +
-  geom_point(aes(color = mean_value), size = 3, alpha = 0.9) +  ### NEW: color by intensity
-  scale_color_viridis(option = "C", direction = 1) +             ### NEW: color palette
+  # Background trend first (so it's behind data)
+  geom_smooth(method = "lm", se = TRUE, color = "#FDAE61", fill = "#FDAE61", 
+              alpha = 0.15, linetype = "dashed", linewidth = 0.9) +
+  geom_smooth(method = "loess", se = FALSE, color = "black", 
+              linetype = "dotted", linewidth = 0.8) +
+  
+  # Data layer
+  geom_line(color = "#2C7BB6", linewidth = 1.2) +
   geom_errorbar(aes(ymin = mean_value - se_value, ymax = mean_value + se_value),
-                width = 0.2, color = "gray50", alpha = 0.7) +
-  geom_smooth(method = "lm", se = TRUE, color = "#FDAE61", fill = "#FDAE61", alpha = 0.2, linetype = "dashed") +
-  geom_smooth(method = "loess", se = FALSE, color = "black", linetype = "dotted", linewidth = 0.8) +  ### NEW
-  geom_label(
-    aes(x = min(year) + 2, y = max(mean_value)),
-    label = annotation_text,
-    hjust = 0, size = 4,
-    fill = "white", color = "black", alpha = 0.8
-  ) +
+                width = 0.4, color = "gray40", alpha = 0.6, linewidth = 0.5) +
+  geom_point(aes(fill = mean_value), size = 3.5, shape = 21, color = "white", stroke = 0.5) +
+  
+  # Color scales
+  scale_fill_viridis_c(option = "plasma", direction = 1, 
+                       guide = guide_colorbar(barwidth = 1, barheight = 10)) +
+  scale_x_continuous(breaks = seq(1990, 2020, 5)) +  # Clean x-axis breaks
+  scale_y_continuous(limits = c(0.05, 0.42), 
+                     breaks = seq(0.1, 0.4, 0.1)) +
+  
+  # Annotation with better positioning
+  annotate("label", 
+           x = 1992, y = 0.41,
+           label = sprintf("p = 2.4e-11\nR² = 0.8\nSlope = 0.0076 abs/yr"),
+           hjust = 0, size = 3.5,
+           fill = "white", color = "black", alpha = 0.9,
+           label.padding = unit(0.4, "lines")) +
+  
+  # Labels
   labs(
     title = "Browning of Trout Bog Lake (May–August)",
     subtitle = "Mean absorbance normalized to 1 cm path length, 1990–2020",
     x = "Year",
     y = "Mean Absorbance (1 cm)",
-    color = "Absorbance"
+    fill = "Absorbance"
   ) +
-  theme_minimal(base_size = 14) +
+  
+  # Theme
+  theme_minimal(base_size = 13) +
   theme(
-    plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
-    plot.subtitle = element_text(size = 12, hjust = 0.5),
-    axis.title = element_text(face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "right"
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 11, hjust = 0, color = "gray30"),
+    axis.title = element_text(face = "bold", size = 12),
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 0),  # Horizontal labels (cleaner)
+    legend.position = "right",
+    legend.title = element_text(size = 10, face = "bold"),
+    panel.grid.minor = element_blank(),  # Remove minor gridlines
+    panel.grid.major = element_line(color = "gray90", linewidth = 0.3),
+    plot.margin = margin(10, 15, 10, 10)
   )
 
 abs_trends_over_years
 
-# ============================================================
-# ===== Objective 2 =====
+# === Visualization of trends post-2010 ===
+
+# Filter data for post-2010
+summer_summary_post2010 <- summer_summary %>% 
+  filter(year > 2010)
+
+# Recalculate statistics for post-2010 period
+lm_post2010 <- lm(mean_value ~ year, data = summer_summary_post2010)
+summary_lm_post2010 <- summary(lm_post2010)
+
+annotation_text_post2010 <- sprintf(
+  "p = %.2e\nR² = %.2f\nSlope = %.4f abs/yr",
+  summary_lm_post2010$coefficients[2, 4],
+  summary_lm_post2010$r.squared,
+  coef(lm_post2010)[2]
+)
+
+# Create plot
+abs_trends_post2010 <- ggplot(summer_summary_post2010, aes(x = year, y = mean_value)) +
+  # Background trend first
+  geom_smooth(method = "lm", se = TRUE, color = "#FDAE61", fill = "#FDAE61", 
+              alpha = 0.15, linetype = "dashed", linewidth = 0.9) +
+  geom_smooth(method = "loess", se = FALSE, color = "black", 
+              linetype = "dotted", linewidth = 0.8) +
+  
+  # Data layer
+  geom_line(color = "#2C7BB6", linewidth = 1.2) +
+  geom_errorbar(aes(ymin = mean_value - se_value, ymax = mean_value + se_value),
+                width = 0.4, color = "gray40", alpha = 0.6, linewidth = 0.5) +
+  geom_point(aes(fill = mean_value), size = 3.5, shape = 21, color = "white", stroke = 0.5) +
+  
+  # Color scales
+  scale_fill_viridis_c(option = "plasma", direction = 1, 
+                       guide = guide_colorbar(barwidth = 1, barheight = 10)) +
+  scale_x_continuous(breaks = seq(2011, 2024, 2)) +
+  scale_y_continuous(limits = c(0.15, 0.42), 
+                     breaks = seq(0.15, 0.40, 0.05)) +
+  
+  # Annotation
+  annotate("label", 
+           x = 2011.5, y = 0.41,
+           label = annotation_text_post2010,
+           hjust = 0, size = 3.5,
+           fill = "white", color = "black", alpha = 0.9,
+           label.padding = unit(0.4, "lines")) +
+  
+  # Labels
+  labs(
+    title = "Browning of Trout Bog Lake (May–August)",
+    subtitle = "Mean absorbance normalized to 1 cm path length, 2011–2020",
+    x = "Year",
+    y = "Mean Absorbance (1 cm)",
+    fill = "Absorbance"
+  ) +
+  
+  # Theme
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 11, hjust = 0, color = "gray30"),
+    axis.title = element_text(face = "bold", size = 12),
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 0),
+    legend.position = "right",
+    legend.title = element_text(size = 10, face = "bold"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "gray90", linewidth = 0.3),
+    plot.margin = margin(10, 15, 10, 10)
+  )
+
+abs_trends_post2010
+
 # ============================================================
 # Goal: Evaluate how non-normal (lognormal) residuals affect
 #       regression uncertainty and model robustness.
