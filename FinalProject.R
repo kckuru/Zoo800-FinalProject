@@ -3,7 +3,7 @@
 #####################
 
 # Author: Keeley Kuru
-# Date: 12/2/25
+# Date: 12/3/25
 # Course: Zoo800
 
 ########################################
@@ -22,9 +22,9 @@
 # Linear regression with mean absorbance as the response
 # and year as the continuous predictor variable.
 
-#######################################
-## 1A. Find two continuous variables ##
-#######################################
+###################################
+## Find two continuous variables ##
+###################################
 
 # -> Variables:
 # 1. Year (from sampledate)
@@ -78,9 +78,9 @@ summer_summary <- summer_tb %>%
 
 print(summer_summary)
 
-###############################
-## 1B. Linear Regression Fit ##
-###############################
+###########################
+## Linear Regression Fit ##
+###########################
 
 # Fit linear model: mean absorbance (Y) vs. year (X)
 lm_model <- lm(mean_value ~ year, data = summer_summary)
@@ -101,46 +101,40 @@ annotation_text <- paste0(
 decadal_change <- slope * 10
 cat("Estimated rate of browning:", round(decadal_change, 3), "absorbance units per decade\n")
 
-##############################
-## 1C. Evaluate Assumptions ##
-##############################
+##########################
+## Evaluate Assumptions ##
+##########################
 
-# Residual diagnostics
+residuals_lm <- resid(lm_model)
+
+# Linearity + homoscedasticity
 par(mfrow = c(1, 2))
 plot(lm_model, which = 1)
 plot(lm_model, which = 2)
 par(mfrow = c(1, 1))
 
-# Breusch-Pagan test for homoscedasticity
-bptest(lm_model)  # formal variance test
-# -> If p > 0.05, fail to reject null hypothesis of homoscedasticity
-# -> If p < 0.05, reject null hypothesis, indicating heteroscedasticity
-# --> p = 0.05799 --> There’s no strong evidence that your model’s residuals have unequal variance; they’re probably homoscedastic.
-# ---> There may be a weak trend toward heteroscedasticity
+# Breusch-Pagan test
+bp_test <- bptest(lm_model)
+print(bp_test)
 
 # Shapiro-Wilk test for normality
-shapiro.test(resid(lm_model))
-# -> If p > 0.05, fail to reject null hypothesis of normality
-# -> If p < 0.05, reject null hypothesis, indicating non-normality
-# --> p = 0.7433 -> There’s no strong evidence that your model’s residuals deviate from normality; they’re probably normal.
-
-# Extract residuals
-residuals_lm <- resid(lm_model)
+sw_test <- shapiro.test(residuals_lm)
+print(sw_test)
 
 # Histogram of residuals
-ggplot(data = data.frame(residuals = residuals_lm), aes(x = residuals)) +
-  geom_histogram(bins = 15, fill = "#2C7BB6", color = "black", alpha = 0.8) +
-  geom_vline(xintercept = 0, color = "red", linetype = "dashed") +
+ggplot(data.frame(residuals = residuals_lm), aes(x = residuals)) +
+  geom_histogram(bins = 12, color = "black", fill = "gray70") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  theme_minimal(base_size = 14) +
   labs(
-    title = "Histogram of Residuals for Trout Bog Lake Regression",
+    title = "Histogram of Regression Residuals",
     x = "Residuals",
     y = "Frequency"
-  ) +
-  theme_minimal(base_size = 14)
+  )
 
-#####################
-## 1D. Predictions ##
-#####################
+#################
+## Predictions ##
+#################
 
 # Find median and 95th percentile of year
 median_year <- median(summer_summary$year)
