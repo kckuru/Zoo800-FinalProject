@@ -132,32 +132,6 @@ ggplot(data.frame(residuals = residuals_lm), aes(x = residuals)) +
     y = "Frequency"
   )
 
-#################
-## Predictions ##
-#################
-
-# Find median and 95th percentile of year
-median_year <- median(summer_summary$year)
-perc95_year <- quantile(summer_summary$year, 0.95)
-
-# Predict mean absorbance and 95% prediction intervals
-predictions <- predict(
-  lm_model,
-  newdata = data.frame(year = c(median_year, perc95_year)),
-  interval = "prediction"
-)
-
-pred_df <- data.frame(
-  year = c(median_year, perc95_year),
-  predictions
-)
-print(pred_df)
-
-# --- Interpretation summary ---
-cat("Predicted mean absorbance (median year ~2008):", round(pred_df$fit[1], 3), "\n")
-cat("Predicted mean absorbance (95th percentile year ~2021):", round(pred_df$fit[2], 3), "\n")
-cat("Change over period:", round(pred_df$fit[2] - pred_df$fit[1], 3), "absorbance units\n")
-cat("This represents a", round(((pred_df$fit[2] - pred_df$fit[1]) / pred_df$fit[1]) * 100, 1), "% increase over time.\n")
 
 ##############
 ## Plotting ##
