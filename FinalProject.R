@@ -3,7 +3,7 @@
 #####################
 
 # Author: Keeley Kuru
-# Date: 11/13/25
+# Date: 12/2/25
 # Course: Zoo800
 
 ########################################
@@ -174,8 +174,6 @@ abs_trends_over_years <- ggplot(summer_summary, aes(x = year, y = mean_value)) +
   # Background trend first (so it's behind data)
   geom_smooth(method = "lm", se = TRUE, color = "#FDAE61", fill = "#FDAE61", 
               alpha = 0.15, linetype = "dashed", linewidth = 0.9) +
-  geom_smooth(method = "loess", se = FALSE, color = "black", 
-              linetype = "dotted", linewidth = 0.8) +
   
   # Data layer
   geom_line(color = "#2C7BB6", linewidth = 1.2) +
@@ -202,7 +200,7 @@ abs_trends_over_years <- ggplot(summer_summary, aes(x = year, y = mean_value)) +
   # Labels
   labs(
     title = "Long-term Browning of Trout Bog Lake (May–August)",
-    subtitle = "Mean absorbance normalized to 1 cm path length, 1990–2020",
+    subtitle = "Mean absorbance normalized to 1 cm path length, 1990–2023",
     x = "Year",
     y = "Mean Absorbance (1 cm)",
     fill = "Absorbance"
@@ -248,8 +246,6 @@ abs_trends_post2010 <- ggplot(summer_summary_post2010, aes(x = year, y = mean_va
   # Background trend first
   geom_smooth(method = "lm", se = TRUE, color = "#FDAE61", fill = "#FDAE61", 
               alpha = 0.15, linetype = "dashed", linewidth = 0.9) +
-  geom_smooth(method = "loess", se = FALSE, color = "black", 
-              linetype = "dotted", linewidth = 0.8) +
   
   # Data layer
   geom_line(color = "#2C7BB6", linewidth = 1.2) +
